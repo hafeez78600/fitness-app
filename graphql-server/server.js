@@ -1,8 +1,12 @@
 require('dotenv').config();
 const { Pool } = require('pg');
-const { ApolloServer, gql } = require('apollo-server');
+const { ApolloServer, gql } = require('apollo-server-express');
+const express = require('express');
 const bcrypt = require('bcrypt');
 const fetch = require('node-fetch');
+const http = require('http');
+
+const app = express();
 
 const pool = new Pool({
   host: process.env.PGHOST,
@@ -54,7 +58,7 @@ const resolvers = {
       const appId = process.env.EDAMAM_APP_ID;
       const appKey = process.env.EDAMAM_APP_KEY;
       const url = `https://api.edamam.com/api/food-database/v2/parser?ingr=${encodeURIComponent(query)}&app_id=${appId}&app_key=${appKey}`;
-      
+
       const res = await fetch(url);
       const data = await res.json();
 
@@ -81,13 +85,11 @@ const resolvers = {
     caloriesPerDay: async (_, { user_id, days }) => {
       try {
         const res = await pool.query(
-          `
-          SELECT TO_CHAR(DATE(created_at), 'YYYY-MM-DD') AS date, SUM(kcal)::int AS total
-          FROM food_log
-          WHERE user_id = $1 AND created_at >= NOW() - ($2 * INTERVAL '1 day')
-          GROUP BY DATE(created_at)
-          ORDER BY DATE(created_at)
-          `,
+          `SELECT TO_CHAR(DATE(created_at), 'YYYY-MM-DD') AS date, SUM(kcal)::int AS total
+           FROM food_log
+           WHERE user_id = $1 AND created_at >= NOW() - ($2 * INTERVAL '1 day')
+           GROUP BY DATE(created_at)
+           ORDER BY DATE(created_at)`,
           [user_id, days]
         );
         return res.rows;
@@ -156,10 +158,21 @@ const resolvers = {
   },
 };
 
-const server = new ApolloServer({ typeDefs, resolvers });
+async function startServer() {
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    introspection: true,
+    playground: true,
+  });
 
-server.listen({ port: process.env.PORT || 4000, host: '0.0.0.0' }).then(({ url }) => {
-  console.log(`🚀 Server ready at ${url}`);
-});
+  await server.start();
+  server.applyMiddleware({ app, path: '/graphql' });
 
+  const PORT = process.env.PORT || 4000;
+  http.createServer(app).listen(PORT, () => {
+    console.log(`🚀 Server ready at http://0.0.0.0:${PORT}${server.graphqlPath}`);
+  });
+}
 
+startServer();

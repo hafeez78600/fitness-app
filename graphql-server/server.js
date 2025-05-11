@@ -169,7 +169,7 @@ async function startServer() {
   await server.start();
   server.applyMiddleware({ app, path: '/graphql' });
 
-  const PORT = process.env.PORT || 4000;
+  const PORT = process.env.PORT || 8080;
   http.createServer(app).listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server ready at http://0.0.0.0:${PORT}${server.graphqlPath}`);
 });

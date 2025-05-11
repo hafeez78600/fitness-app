@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { Text, View } from 'react-native';
 
 const client = new ApolloClient({
-  uri: 'http://10.0.2.2:4000/',
+  uri: 'https://fitness-app-production-4c69.up.railway.app/graphql',
   cache: new InMemoryCache(),
 });
 

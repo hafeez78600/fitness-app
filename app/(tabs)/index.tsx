@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { gql, useQuery } from '@apollo/client';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '@/contexts/AuthContext';
-import FoodListLog from '@/components/FoodListLog';
+import FoodListLog from '../../components/FoodListLog';
 import CalorieList from '@/components/CalorieList';
 
 const GET_FOOD_LOGS = gql`

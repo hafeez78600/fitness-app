@@ -170,9 +170,10 @@ async function startServer() {
   server.applyMiddleware({ app, path: '/graphql' });
 
   const PORT = process.env.PORT || 4000;
-  http.createServer(app).listen(PORT, () => {
-    console.log(`🚀 Server ready at http://0.0.0.0:${PORT}${server.graphqlPath}`);
-  });
+  http.createServer(app).listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server ready at http://0.0.0.0:${PORT}${server.graphqlPath}`);
+});
+
 }
 
 startServer();
